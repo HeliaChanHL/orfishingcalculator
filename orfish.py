@@ -40,7 +40,10 @@ with col2:
 if st.session_state.calc:
     orfishTab1.formUI()
 else:
-    orfishTab2.display()
+    if 'minBiomesFound' in st.session_state:
+        orfishTab2.display()
+    else:
+        st.warning("Please select fish.")
 
 st.write("")
 st.write("")
@@ -61,3 +64,4 @@ with footer_container:
     with col3:
 
         st.markdown("[Join OR-Finishes Discord](https://discord.gg/or-finishes)")
+
