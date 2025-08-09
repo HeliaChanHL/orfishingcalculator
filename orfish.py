@@ -7,7 +7,7 @@ st.title('OR Fishing Calculator')
 st.write("OR-Finishes Web Application")
 custom_css = """
 <style>
-.st-emotion-cache-fw8xvw { /* stElementContainer */
+.st-emotion-cache-zh2fnc { /* stElementContainer */
   width: 100%;
   max-width: 100%;  
 }
@@ -59,4 +59,5 @@ with footer_container:
         st.write("Copyright © Amelia Freeman")
     
     with col3:
+
         st.markdown("[Join OR-Finishes Discord](https://discord.gg/or-finishes)")
