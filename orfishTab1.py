@@ -1,5 +1,6 @@
 from fishingData import *
 import streamlit as st
+from os import path
 
 def modalContent():
     st.markdown(modaltext)
@@ -7,13 +8,15 @@ def modalContent():
 def formUI():
     st.header("Select Fish:")
     
+    # Initialize session state for tab count and inputs
     if 'tab_count' not in st.session_state:
         st.session_state.tab_count = 1
         st.session_state.inputs = {
             f'Fish {i + 1}': {
-                'Fish': list(fishTypes.keys())[0].capitalize(),
-                'Size': list(sizeOdds.keys())[0].capitalize(),
-                'Amount': 1  # Default amount
+                'Fish': None,  # Default to "Select a Fish"
+                'Size': None,
+                'Amount': 1,
+                'InputGroup': 1 
             } for i in range(st.session_state.tab_count)
         }
 
@@ -21,61 +24,88 @@ def formUI():
         new_tab_name = f'Fish {st.session_state.tab_count + 1}'
         st.session_state.tab_count += 1
         st.session_state.inputs[new_tab_name] = {
-            'Fish': list(fishTypes.keys())[0].capitalize(),
-            'Size': list(sizeOdds.keys())[0].capitalize(),
-            'Amount': 1  # Default amount
+            'Fish': None,
+            'Size': None,
+            'Amount': 1,
+            'InputGroup': 1 
         }
 
+    def fishPNG(selected_fish):
+        if selected_fish == "Select a Fish":
+            return  # Don't attempt to load an image if no fish is selected
+            
+        image_path = f"fish_renders/{selected_fish.replace(' ', '_').lower()}.png"
+        if path.isfile(image_path):
+            st.image(image_path, caption=selected_fish, width=200)
+            if current_fish != selected_fish:
+                st.rerun()
+        else:
+            st.error(f"Image for {selected_fish} not found.")
+
+    # Button to add a new fish tab
     if st.button('Add a Fish'):
         add_tab()
 
     tabs = list(st.session_state.inputs.keys())
     selected_tab = st.tabs(tabs)
-
+    
     for i, tab in enumerate(tabs):
         with selected_tab[i]:
             current_fish = st.session_state.inputs[tab]['Fish']
+            
+            # Gather all selected fish from previous tabs
+            selected_fish_set = {st.session_state.inputs[t]['Fish'] for t in tabs if t != tab}
             fish_list = [' '.join(word.capitalize() for word in fish.replace('_', ' ').split()) for fish in fishTypes.keys()]
+            filtered_fish_list = ["Select a Fish"] + [fish for fish in fish_list if fish not in selected_fish_set]
 
-            col1, col2, col3 = st.columns(3)
+            col1, col2 = st.columns([2, 1])
+
             with col1:
-                if current_fish not in fish_list:
-                    current_fish = fish_list[0]
-                
+                # Ensure the current fish is valid
+                if current_fish not in filtered_fish_list:
+                    current_fish = filtered_fish_list[0]
+
+                # Select box for choosing fish type
                 selected_fish = st.selectbox(
                     f'Fish Type for Fish {i + 1}',
-                    fish_list,
-                    index=fish_list.index(current_fish),
-                    key=f'fish_{tab}{i}'
+                    filtered_fish_list,
+                    index=filtered_fish_list.index(current_fish),
+                    key=f'fish_{tab}_{i}'
                 )
-                st.session_state.inputs[tab]['Fish'] = selected_fish
-            
+
+                # Update session state with selected fish
+                if selected_fish != "Select a Fish":
+                    st.session_state.inputs[tab]['Fish'] = selected_fish
+                    for j in range(st.session_state.inputs[tab]['InputGroup']):
+                        with st.container(border=True):
+                            current_size = st.session_state.inputs[tab]['Size']
+                            size_list = [size.capitalize() for size in sizeOdds.keys()]
+
+                            if current_size not in size_list:
+                                current_size = size_list[0]
+
+                            selected_size = st.selectbox(
+                                f'Size for Fish {i + 1}',
+                                size_list,
+                                index=size_list.index(current_size),
+                                key=f'size_{tab}_{j}_{i}'
+                            )
+                            st.session_state.inputs[tab]['Size'] = selected_size
+
+                            # Initialize the amount from session state
+                            current_amount = st.session_state.inputs[tab].get('Amount', 1)
+                            amount = st.number_input('Enter Amount:', min_value=1, value=current_amount, key=f'amount_{tab}_{j}_{i}')
+                            st.session_state.inputs[tab]['Amount'] = amount
+
+                    if st.button("Add New Size", key=f'add_size_{tab}_{i}'):
+                        st.session_state.inputs[tab]['InputGroup'] += 1
+                        st.rerun()
             with col2:
-                current_size = st.session_state.inputs[tab]['Size']
-                size_list = [size.capitalize() for size in sizeOdds.keys()]
+                # Update image based on the selected fish
+                fishPNG(selected_fish)
 
-                if current_size not in size_list:
-                    current_size = size_list[0]
-
-                selected_size = st.selectbox(
-                    f'Size for Fish {i + 1}',
-                    size_list,
-                    index=size_list.index(current_size),
-                    key=f'size_{tab}{i}'  
-                )
-                st.session_state.inputs[tab]['Size'] = selected_size
-            
-            with col3:
-                # Initialize the amount from session state
-                current_amount = st.session_state.inputs[tab].get('Amount', 1)
-                amount = st.number_input('Enter Amount:', min_value=1, value=current_amount, key=f'amount_{tab}{i}')
-                st.session_state.inputs[tab]['Amount'] = amount
-
-    # Optionally, add a submit button to handle the input data
-    if st.button('Submit (Double Click)'):
-        # Process the input data here
-        calc()
-
+    st.button('Submit', on_click=calc)
+        
 def calc():
     # Initialize global variables to track the minimum biomes found
     minBiomesFound = float('inf')
@@ -92,7 +122,7 @@ def calc():
         st.session_state.bestBiomeMapping = bestBiomeMapping
         st.session_state.calc = False
     else:
-        st.alert("No valid combination found.")
+        st.warning("No valid combination found.")
 
 def findBestCombination(fishList, index, biomeMap, addedFish, minBiomesFound, bestBiomeMapping):
     # Base case: if index exceeds fishList length, check biomes count
@@ -103,22 +133,23 @@ def findBestCombination(fishList, index, biomeMap, addedFish, minBiomesFound, be
 
     # Get the current fish type
     currentFish = fishList[index]
-    biomesToConsider = biomesToConsiderFormat(fishTypes[currentFish]["biomes"], biomeMap)
+    if currentFish!=None:
+        biomesToConsider = biomesToConsiderFormat(fishTypes[currentFish]["biomes"], biomeMap)
 
-    for biome in biomesToConsider:
-        tempBiomeMap = updateBiomeMap(biome, biomeMap)
-        if currentFish not in addedFish:
-            if biome not in tempBiomeMap:
-                tempBiomeMap[biome] = [currentFish]
-            elif currentFish not in tempBiomeMap[biome]:
-                tempBiomeMap[biome].append(currentFish)
+        for biome in biomesToConsider:
+            tempBiomeMap = updateBiomeMap(biome, biomeMap)
+            if currentFish not in addedFish:
+                if biome not in tempBiomeMap:
+                    tempBiomeMap[biome] = [currentFish]
+                elif currentFish not in tempBiomeMap[biome]:
+                    tempBiomeMap[biome].append(currentFish)
 
-            addedFish.add(currentFish)  # Mark this fish as added
-            # Recursive call to explore the next fish
-            minBiomesFound, bestBiomeMapping = findBestCombination(
-                fishList, index + 1, tempBiomeMap, addedFish, minBiomesFound, bestBiomeMapping
-            )
-            addedFish.remove(currentFish)  # Backtrack: remove the fish after the recursion
+                addedFish.add(currentFish)  # Mark this fish as added
+                # Recursive call to explore the next fish
+                minBiomesFound, bestBiomeMapping = findBestCombination(
+                    fishList, index + 1, tempBiomeMap, addedFish, minBiomesFound, bestBiomeMapping
+                )
+                addedFish.remove(currentFish)  # Backtrack: remove the fish after the recursion
 
     return minBiomesFound, bestBiomeMapping  # Ensure to return the best found mapping
 

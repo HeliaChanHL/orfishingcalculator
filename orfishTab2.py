@@ -38,10 +38,28 @@ def display():
     st.write(f"Best combination with {st.session_state.minBiomesFound} unique biomes:")
 
     df_biome_fish = pd.DataFrame(
-        [(biome, fish) for biome, fish_list in st.session_state.bestBiomeMapping.items() for fish in fish_list],
+        st.session_state.bestBiomeMapping.items(),
         columns=["Biome", "Fish"]
     )
     st.dataframe(df_biome_fish)
+
+    st.write("Fish Price List:")
+
+    data = [
+        (
+            item["Fish"],
+            item["Size"],
+            item["Amount"],
+            calcPrices(item),
+            item["Amount"] * calcPrices(item)
+        )
+        for item in st.session_state.inputs.values()
+    ]
+
+    df_inputs = pd.DataFrame(data, columns=["Fish", "Size", "Amount", "Price", "Total Price"])
+    st.dataframe(df_inputs)
+    total_income = df_inputs["Total Price"].sum()
+    st.success(f"Total Income from Selling Fish: {total_income} rubies")
 
     st.write("Fish List:")
 
@@ -50,18 +68,10 @@ def display():
             item["Fish"],
             fishTypes[item["Fish"]]["biomes"],
             item["Size"],
-            item["Amount"],
             calcOdds(item),
-            calcPrices(item),
-            item["Amount"] * calcPrices(item)
         )
         for item in st.session_state.inputs.values()
     ]
 
-    df_inputs = pd.DataFrame(data, columns=["Fish", "Biomes", "Size", "Amount", "Catch Odds % per Fish", "Price", "Total Price"])
-
-    total_income = df_inputs["Total Price"].sum()
-    
-    st.success(f"Total Income from Selling Fish: {total_income} rubies")
-    
+    df_inputs = pd.DataFrame(data, columns=["Fish", "Biomes", "Size", "Catch Odds % per Fish"])
     st.dataframe(df_inputs)
