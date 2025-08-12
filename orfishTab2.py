@@ -14,23 +14,19 @@ def fishperBiome(fishTypes):
 # Calculate biome counts
 biome_counts = fishperBiome(fishTypes)
 
-def calcOdds(fish):
+def calcOdds(fish,j):
 	fishbiome=0
-	if fish["Fish"] not in fishTypes:
-		return 0
 	rarity = fishTypes[fish["Fish"]]["rarity"]
 		
 	for biome in st.session_state.bestBiomeMapping.keys():
 		if fish["Fish"] in st.session_state.bestBiomeMapping[biome]:
 			fishbiome=biome
 			break
-	return (sizeOdds[fish["Size"].lower()] / 100) * rarityOdds[rarity] * (1 /biome_counts[fishbiome])
+	return (sizeOdds[fish["Size"][j].lower()] / 100) * rarityOdds[rarity] * (1 /biome_counts[fishbiome])
 
-def calcPrices(fish):
-    if fish["Fish"] not in fishTypes:
-        return 0
+def calcPrices(fish,j):
     model = fishTypes[fish["Fish"]]["model"]
-    size = sizeList[model][fish["Size"].lower()]
+    size = sizeList[model][fish["Size"][j].lower()]
     return priceList[size]+rarityList[fishTypes[fish["Fish"]]["rarity"]]
 
 def display():
@@ -42,18 +38,20 @@ def display():
         columns=["Biome", "Fish"]
     )
     st.dataframe(df_biome_fish)
-
+    with st.expander("Raw Inputs:", expanded=False):
+        st.write(st.session_state.inputs)
     st.write("Fish Price List:")
 
     data = [
         (
             item["Fish"],
-            item["Size"],
-            item["Amount"],
-            calcPrices(item),
-            item["Amount"] * calcPrices(item)
+            item["Size"][j],
+            item["Amount"][j],
+            calcPrices(item, j),
+            item["Amount"][j] * calcPrices(item, j)
         )
         for item in st.session_state.inputs.values()
+        for j in range(len(item["Size"]))
     ]
 
     df_inputs = pd.DataFrame(data, columns=["Fish", "Size", "Amount", "Price", "Total Price"])
@@ -67,11 +65,13 @@ def display():
         (
             item["Fish"],
             fishTypes[item["Fish"]]["biomes"],
-            item["Size"],
-            calcOdds(item),
+            item["Size"][j],
+            calcOdds(item,j),
         )
         for item in st.session_state.inputs.values()
+        for j in range(len(item["Size"]))
     ]
 
     df_inputs = pd.DataFrame(data, columns=["Fish", "Biomes", "Size", "Catch Odds % per Fish"])
     st.dataframe(df_inputs)
+

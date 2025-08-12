@@ -7,7 +7,7 @@ st.title('OR Fishing Calculator')
 st.write("OR-Finishes Web Application")
 custom_css = """
 <style>
-.st-emotion-cache-zh2fnc { /* stElementContainer */
+.st-emotion-cache-fw8xvw { /* stElementContainer */
   width: 100%;
   max-width: 100%;  
 }
@@ -41,10 +41,14 @@ with col2:
 if st.session_state.calc:
     orfishTab1.formUI()
 else:
-    if 'minBiomesFound' in st.session_state:
-        orfishTab2.display()
+    if 'minBiomesFound' not in st.session_state:
+        st.warning("Please select at least one fish.")
+    elif "bestBiomeMapping" not in st.session_state:
+        st.warning("No valid combination found.")
+    elif "inputs" not in st.session_state:
+        st.warning("Must contain at least one valid input.")
     else:
-        st.warning("Please select fish.")
+        orfishTab2.display()
 
 st.write("")
 st.write("")
@@ -58,6 +62,7 @@ with footer_container:
     
     with col1:
         st.write("Built by McSwagical (contact if issues occur.)")
+        st.write("Fish Assets by itsMarkiS")
     
     with col2:
         st.write("Copyright © Amelia Freeman")
@@ -87,5 +92,4 @@ with footer_container:
                 </button>
             </a>
                     
-
         """, unsafe_allow_html=True)
