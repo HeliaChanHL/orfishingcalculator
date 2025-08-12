@@ -5,6 +5,7 @@ import orfishTab2
 # Title of the app
 st.title('OR Fishing Calculator')
 st.write("OR-Finishes Web Application")
+st.write("Ever need to find the least amouont of biomes to visit to get all the fish you need? What about income from fishing? Here's the tool for you!")
 custom_css = """
 <style>
 .st-emotion-cache-zh2fnc { /* stElementContainer */

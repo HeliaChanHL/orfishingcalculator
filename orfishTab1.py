@@ -56,7 +56,7 @@ def formUI():
                 # Gather all selected fish from previous tabs
                 selected_fish_set = {st.session_state.inputs[t]['Fish'] for t in tabs if t != tab}
                 fish_list = [' '.join(word.capitalize() for word in fish.replace('_', ' ').split()) for fish in fishTypes.keys()]
-                filtered_fish_list = ["Select a Fish"] + [fish for fish in fish_list if fish not in selected_fish_set]
+                filtered_fish_list = ["Select a Fish"] + sorted([fish for fish in fish_list if fish not in selected_fish_set])
 
                 col1, col2 = st.columns([2, 1])
 
