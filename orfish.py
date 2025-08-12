@@ -18,10 +18,15 @@ st.markdown(custom_css, unsafe_allow_html=True)
 
 if 'calc' not in st.session_state:
     st.session_state.calc = True
-
+if 'buttonText' not in st.session_state:
+    st.session_state.buttonText = "Fishing Calculator"
 # Function to set the active tab
-def set_active_tab(tab_name):
+def set_active_tab():
     st.session_state.calc = not st.session_state.calc
+    if st.session_state.calc==True:
+        st.session_state.buttonText="Results"
+    else:
+        st.session_state.buttonText = "Fishing Calculator"
 
 # Function to show the dialog with crop information
 @st.dialog("How to Use the OR Fishing Calculator")
@@ -32,7 +37,7 @@ def showFishDialog():
 col1, col2 = st.columns(2)
 
 with col1:
-    st.button("Fishing Calculator", on_click=set_active_tab, args=("Tab 1",))
+    st.button(st.session_state.buttonText, on_click=set_active_tab)
 with col2:
     if st.button("How to Use"):
         showFishDialog()  # Call the dialog function
@@ -92,5 +97,4 @@ with footer_container:
                 </button>
             </a>
                     
-
         """, unsafe_allow_html=True)
