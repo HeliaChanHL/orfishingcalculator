@@ -7,8 +7,7 @@ def modalContent():
 
 def formUI():
     st.header("Select Fish:")
-    if 'addTab' not in st.session_state:
-        st.session_state.addTab=False
+
     # Initialize session state for tab count and inputs
     if 'tab_count' not in st.session_state:
         st.session_state.tab_count = 1
