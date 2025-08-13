@@ -7,7 +7,8 @@ def modalContent():
 
 def formUI():
     st.header("Select Fish:")
-    
+    if 'addTab' not in st.session_state:
+        st.session_state.addTab=False
     # Initialize session state for tab count and inputs
     if 'tab_count' not in st.session_state:
         st.session_state.tab_count = 1
@@ -33,7 +34,6 @@ def formUI():
     def fishPNG(selected_fish):
         if selected_fish == "Select a Fish":
             return
-            
         image_path = f"fish_renders/{selected_fish.replace(' ', '_').lower()}.png"
         if path.isfile(image_path):
             st.image(image_path, caption=selected_fish, width=200)
@@ -42,19 +42,18 @@ def formUI():
         else:
             st.error(f"Image for {selected_fish} not found.")
 
-    # Button to add a new fish tab
-    if st.button('Add a Fish'):
+    if st.button("Add a Fish"):
         add_tab()
     if st.session_state.inputs!={}:
-        tabs = list(st.session_state.inputs.keys())
-        selected_tab = st.tabs(tabs)
-        
-        for i, tab in enumerate(tabs):
+        fishTabs = [f"{key}: {value['Fish']}" if value["Fish"] != "Select a Fish" else key for key, value in st.session_state.inputs.items()]
+        selected_tab = st.tabs(fishTabs)
+        for i, tab in enumerate(fishTabs):
             with selected_tab[i]:
+                tab=tab.split(":")[0]
                 current_fish = st.session_state.inputs[tab]['Fish']
                 
                 # Gather all selected fish from previous tabs
-                selected_fish_set = {st.session_state.inputs[t]['Fish'] for t in tabs if t != tab}
+                selected_fish_set = {st.session_state.inputs[t.split(":")[0]]['Fish'] for t in fishTabs if t.split(":")[0] != tab}
                 fish_list = [' '.join(word.capitalize() for word in fish.replace('_', ' ').split()) for fish in fishTypes.keys()]
                 filtered_fish_list = ["Select a Fish"] + sorted([fish for fish in fish_list if fish not in selected_fish_set])
 
@@ -82,49 +81,57 @@ def formUI():
                             st.session_state.inputs[tab]['Amount'].append(1)
                             st.rerun()
 
-                        for j in range(st.session_state.inputs[tab]['InputGroup']):
-                            with st.container(border=True):
-                                current_size = st.session_state.inputs[tab]['Size'][j]
-                                selected_size_set = {st.session_state.inputs[tab]['Size'][x] for x in range(len(st.session_state.inputs[tab]['Size'])) if x != j}
-                                size_list = [size.capitalize() for size in sizeOdds.keys()]
-                                filtered_size_list = ["Select a Size"] + [size for size in size_list if size not in selected_size_set]
-
-                                if current_size not in filtered_size_list:
-                                    current_size = filtered_size_list[0]
-                                selected_size = st.selectbox(
-                                    f"Size for {st.session_state.inputs[tab]['Fish']} {j + 1}:",
-                                    filtered_size_list,
-                                    index=filtered_size_list.index(current_size), 
-                                    key=f'size_{tab}_{j}_{i}'  
-                                )
-
-                                st.session_state.inputs[tab]['Size'][j] = selected_size
-
-                                current_amount = st.session_state.inputs[tab]["Amount"][j]
-                                amount = st.number_input(
-                                    f'Amount for {st.session_state.inputs[tab]["Fish"]} {j+1}:',
-                                    min_value=1,
-                                    value=current_amount,
-                                    key=f'amount_{tab}_{j}_{i}'
-                                )
-                                st.session_state.inputs[tab]['Amount'][j]=amount
-
-                        
+                        selectFishDetails(tab,i)
                 with col2:
                     fishPNG(selected_fish)
-
         st.button('Submit', on_click=calc)
     else:
         st.warning("Please select at least one fish.")
-        
+        st.session_state.tab_count=0
+        st.session_state.inputs={}
+
+def selectFishDetails(tab,i):
+    for j in range(st.session_state.inputs[tab]['InputGroup']):
+        with st.container(border=True):
+            current_size = st.session_state.inputs[tab]['Size'][j]
+            selected_size_set = {st.session_state.inputs[tab]['Size'][x] for x in range(len(st.session_state.inputs[tab]['Size'])) if x != j}
+            size_list = [size.capitalize() for size in sizeOdds.keys()]
+            filtered_size_list = ["Select a Size"] + [size for size in size_list if size not in selected_size_set]
+
+            if current_size not in filtered_size_list:
+                current_size = filtered_size_list[0]
+            selected_size = st.selectbox(
+                f"Size for {st.session_state.inputs[tab]['Fish']} {j + 1}:",
+                filtered_size_list,
+                index=filtered_size_list.index(current_size), 
+                key=f'size_{tab}_{j}_{i}'  
+            )
+
+            st.session_state.inputs[tab]['Size'][j] = selected_size
+
+            current_amount = st.session_state.inputs[tab]["Amount"][j]
+            amount = st.number_input(
+                f'Amount for {st.session_state.inputs[tab]["Fish"]} {j+1}:',
+                min_value=1,
+                value=current_amount,
+                key=f'amount_{tab}_{j}_{i}'
+            )
+            st.session_state.inputs[tab]['Amount'][j]=amount
 def calc():
     keys_to_remove = []
     for key, value in st.session_state.inputs.items():
         if value["Fish"] == "Select a Fish" or set(value["Size"])=={"Select a Size"}:
             keys_to_remove.append(key)
+        else:
+            for i in range(len(value["Size"])):
+                if value["Size"][i] == "Select a Size":
+                    value["Size"].pop(i)
+                    value["Amount"].pop(i)
+            value["InputGroup"]=len(value["Size"])
     for key in keys_to_remove:
         del st.session_state.inputs[key]
-    else:
+    st.session_state.tab_count=len(st.session_state.inputs)
+    if st.session_state.inputs:
         minBiomesFound = float('inf')
         bestBiomeMapping = None
         
@@ -134,7 +141,6 @@ def calc():
             st.session_state.minBiomesFound = minBiomesFound
             st.session_state.bestBiomeMapping = bestBiomeMapping
             st.session_state.calc = False
-
 
 def findBestCombination(fishList, index, biomeMap, addedFish, minBiomesFound, bestBiomeMapping):
     # Base case: if index exceeds fishList length, check biomes count

@@ -21,6 +21,7 @@ if 'calc' not in st.session_state:
     st.session_state.calc = True
 if 'buttonText' not in st.session_state:
     st.session_state.buttonText = "Fishing Calculator"
+    st.session_state.buttonDis = True
 # Function to set the active tab
 def set_active_tab():
     st.session_state.calc = not st.session_state.calc
@@ -38,7 +39,7 @@ def showFishDialog():
 col1, col2 = st.columns(2)
 
 with col1:
-    st.button(st.session_state.buttonText, on_click=set_active_tab)
+    st.button(st.session_state.buttonText, on_click=set_active_tab,disabled=st.session_state.buttonDis)
 with col2:
     if st.button("How to Use"):
         showFishDialog()  # Call the dialog function
@@ -48,12 +49,16 @@ if st.session_state.calc:
     orfishTab1.formUI()
 else:
     if 'minBiomesFound' not in st.session_state:
-        st.warning("Please select at least one fish.")
+        st.session_state.buttonDis=True
+    elif "inputs" not in st.session_state:
+        st.session_state.buttonDis=True
     elif "bestBiomeMapping" not in st.session_state:
         st.warning("No valid combination found.")
-    elif "inputs" not in st.session_state:
-        st.warning("Must contain at least one valid input.")
+        st.session_state.buttonDis=True
     else:
+        if st.session_state.buttonDis:
+            st.session_state.buttonDis=False
+            st.rerun()
         orfishTab2.display()
 
 st.write("")
@@ -83,8 +88,9 @@ with footer_container:
                     padding: 10px 20px;
                     text-align: center;
                     text-decoration: none;
+                    border: 2px solid #111978;
                     border-radius: 5px;
-                    font-size: 16px;
+                    font-size: 14px;
                     font-family: Arial, sans-serif;
                     transition: background-color 0.3s;
                 }
