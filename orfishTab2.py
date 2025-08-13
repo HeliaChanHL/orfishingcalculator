@@ -31,17 +31,29 @@ def calcPrices(fish,j):
 
 def display():
     st.header("Results:")
+    st.markdown("---")
+    st.subheader("Fishing Locations")
     st.write(f"Best combination with {st.session_state.minBiomesFound} unique biomes:")
 
     df_biome_fish = pd.DataFrame(
         st.session_state.bestBiomeMapping.items(),
-        columns=["Biome", "Fish"]
+        columns=["Biome Category", "Fish"]
     )
     st.dataframe(df_biome_fish)
-    with st.expander("Raw Inputs:", expanded=False):
-        st.write(st.session_state.inputs)
-    st.write("Fish Price List:")
+    st.write(f"Specific Biomes in Biome categories:")
+    data = [
+        (
+           item,
+           [' '.join(word.capitalize() for word in j.split(":")[1].replace('_', ' ').split()) for j in fishingBiomes[item]]
+        )
+        for item in st.session_state.bestBiomeMapping.keys()
 
+    ]
+
+    df_inputs = pd.DataFrame(data, columns=["Biome Category","Biomes"])
+    st.dataframe(df_inputs)
+    st.markdown("---")
+    st.subheader("Fish Income")
     data = [
         (
             item["Fish"],
@@ -58,8 +70,8 @@ def display():
     st.dataframe(df_inputs)
     total_income = df_inputs["Total Price"].sum()
     st.success(f"Total Income from Selling Fish: {total_income} rubies")
-
-    st.write("Fish List:")
+    st.markdown("---")
+    st.subheader("Fish Odds:")
 
     data = [
         (
@@ -75,3 +87,5 @@ def display():
     df_inputs = pd.DataFrame(data, columns=["Fish", "Biomes", "Size", "Catch Odds % per Fish"])
     st.dataframe(df_inputs)
 
+    with st.expander("Raw Inputs:", expanded=False):
+        st.write(st.session_state.inputs)

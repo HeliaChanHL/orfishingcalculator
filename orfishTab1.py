@@ -3,11 +3,14 @@ import streamlit as st
 from os import path
 
 def modalContent():
+    st.link_button("See ORFinishes Fish List Here", 
+               "https://docs.google.com/spreadsheets/d/1ckMvE1eoS5tl_gy2Jk7AZ94J-pN-3OCmvMz9DwqlSro/edit?gid=1659613960#gid=1659613960", 
+               icon="🐟")
     st.markdown(modaltext)
 
 def formUI():
     st.header("Select Fish:")
-
+    st.markdown("---")
     # Initialize session state for tab count and inputs
     if 'tab_count' not in st.session_state:
         st.session_state.tab_count = 1
