@@ -57,7 +57,7 @@ def formUI():
                 st.rerun()
         else:
             st.error(f"Image for {selected_fish} not found.")
-    col1,col2=st.columns([2,1])
+    col1,col2=st.columns([3,1])
     with col1:
         if st.button("Add a Fish"):
             add_tab()
@@ -118,8 +118,10 @@ def selectFishDetails(tab,i):
             current_size = st.session_state.inputs[tab]['Size'][j]
             selected_size_set = {st.session_state.inputs[tab]['Size'][x] for x in range(len(st.session_state.inputs[tab]['Size'])) if x != j}
             size_list = [size.capitalize() for size in sizeOdds.keys()]
-            filtered_size_list = ["Select a Size"] + [size for size in size_list if size not in selected_size_set]
-
+            filtered_size_list = ["Select a Size"] + [
+                f"{size} ({sizeList[fishTypes[st.session_state.inputs[tab]['Fish']]['model']][size.lower()]} cm)"
+                for size in size_list if size not in selected_size_set
+            ]
             if current_size not in filtered_size_list:
                 current_size = filtered_size_list[0]
             selected_size = st.selectbox(
@@ -218,5 +220,4 @@ def updateBiomeMap(biome, biomeMap):
         tempBiomeMap[biome] = biomeMap["arid"]
         del tempBiomeMap["arid"]
     
-
     return tempBiomeMap
