@@ -32,7 +32,21 @@ def formUI():
             'Amount': [1],
             'InputGroup': 1 
         }
-
+    def delete_tab(tab):
+        del st.session_state.inputs[tab]
+        st.rerun()
+    def add_All():
+        st.session_state.inputs={}
+        st.session_state.tab_count=0
+        for i in list(fishTypes.keys()):
+            st.session_state.tab_count += 1
+            new_tab_name = f'Fish {st.session_state.tab_count }'
+            st.session_state.inputs[new_tab_name] = {
+                'Fish': i,
+                'Size': ["Giant"],
+                'Amount': [1],
+                'InputGroup': 1 
+        }
     def fishPNG(selected_fish):
         if selected_fish == "Select a Fish":
             return
@@ -43,9 +57,13 @@ def formUI():
                 st.rerun()
         else:
             st.error(f"Image for {selected_fish} not found.")
-
-    if st.button("Add a Fish"):
-        add_tab()
+    col1,col2=st.columns([3,1])
+    with col1:
+        if st.button("Add a Fish"):
+            add_tab()
+    with col2:
+        if st.button("Add all Giant Fish Types"):
+            add_All()
     if st.session_state.inputs!={}:
         fishTabs = [f"{key}: {value['Fish']}" if value["Fish"] != "Select a Fish" else key for key, value in st.session_state.inputs.items()]
         selected_tab = st.tabs(fishTabs)
@@ -86,6 +104,8 @@ def formUI():
                         selectFishDetails(tab,i)
                 with col2:
                     fishPNG(selected_fish)
+                    if st.button("🗑️ Delete", key=f"delete_{tab}"):
+                        delete_tab(tab)
         st.button('Submit', on_click=calc)
     else:
         st.warning("Please select at least one fish.")
