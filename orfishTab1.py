@@ -57,7 +57,7 @@ def formUI():
                 st.rerun()
         else:
             st.error(f"Image for {selected_fish} not found.")
-    col1,col2=st.columns([3,1])
+    col1,col2=st.columns([2,1])
     with col1:
         if st.button("Add a Fish"):
             add_tab()
@@ -218,4 +218,5 @@ def updateBiomeMap(biome, biomeMap):
         tempBiomeMap[biome] = biomeMap["arid"]
         del tempBiomeMap["arid"]
     
+
     return tempBiomeMap
