@@ -141,7 +141,7 @@ def selectFishDetails(tab,i):
             size_list = [size.capitalize() for size in sizeOdds.keys()]
             filtered_size_list = ["Select a Size"] + [
                 f"{size} ({sizeList[fishTypes[st.session_state.inputs[tab]['Fish']]['model']][size.lower()]} cm)"
-                for size in size_list if size not in selected_size_set
+                for size in size_list if f"{size} ({sizeList[fishTypes[st.session_state.inputs[tab]['Fish']]['model']][size.lower()]} cm)" not in selected_size_set
             ]
             if current_size not in filtered_size_list:  
                 current_size = filtered_size_list[0]

@@ -107,7 +107,7 @@ def display():
         selected_fish = spawn_group_fish[selected_biome]
 
         st.write(f"Here are the fish available in {selected_biome.capitalize()} biomes:")
-        
+
         # Capitalize fish names
         capitalized_fish = [' '.join(word.capitalize() for word in item.split("_")) for item in selected_fish]
         current_fish=capitalized_fish[st.session_state.fishIndex]
@@ -196,7 +196,7 @@ def fishChart2(df_inputs):
     added_fish_names = set()
     # Get unique fish types and sorted size types
     unique_fish = sorted(df_inputs['Fish'].unique())
-    sorted_size_types = list(sizeOdds.keys())  # Assuming sizeOdds is defined elsewhere
+    sorted_size_types = list(sizeOdds.keys())
     default_colors = colors.DEFAULT_PLOTLY_COLORS
 
     for index, fish in enumerate(unique_fish):
@@ -205,7 +205,10 @@ def fishChart2(df_inputs):
         
         for j, size_type in enumerate(sorted_size_types):
             for i in range(len(fish_data)):
-                if size_type.capitalize() == fish_data["Size"].iloc[i]:
+                model = fishTypes[fish]['model']
+                size_value = sizeList[model][size_type]
+                size_string = f"{size_type.capitalize()} ({size_value} cm)"
+                if size_string == fish_data["Size"].iloc[i]:
                     sorted_dict[j] = (fish_data["Size"].iloc[i], fish_data["Total Price"].iloc[i])
                     break
 
