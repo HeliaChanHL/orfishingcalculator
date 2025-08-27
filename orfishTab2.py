@@ -253,18 +253,17 @@ def fishChart3(df_inputs):
     fig = go.Figure()
     default_colors = colors.DEFAULT_PLOTLY_COLORS
     added_fish_names = set()
-    index=-1
+
     for fish in fish_df.iterrows():
         show_legend = fish[1]['Fish'] not in added_fish_names
         if show_legend:
-            index+=1
             added_fish_names.add(fish[1]['Fish'])
-
+        added_fish_list = list(added_fish_names)
         fig.add_trace(go.Bar(
             x=[f"{fish[1]['Fish']} - {fish[1]['Size']}"], 
             y=[fish[1]['Total Price']], 
             name=fish[1]['Fish'],
-            marker_color=default_colors[index % len(default_colors)],
+            marker_color=default_colors[added_fish_list.index(fish[1]['Fish']) % len(default_colors)],
             showlegend=show_legend
         ))
 
