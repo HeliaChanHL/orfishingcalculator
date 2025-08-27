@@ -104,8 +104,7 @@ def display():
         with st.expander("Raw Inputs:", expanded=False):
             st.write(st.session_state.inputs)
     else:
-        if "fishIndex" not in st.session_state:
-            st.session_state.fishIndex=0
+		st.session_state.fishIndex=0
         selected_biome = st.session_state.selected_biome.lower().replace(' ',"_")
         selected_fish = spawn_group_fish[selected_biome]
         
@@ -278,4 +277,5 @@ def fishChart3(df_inputs):
     )
 
     # Display the chart
+
     st.plotly_chart(fig, use_container_width=True)
