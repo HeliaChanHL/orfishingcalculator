@@ -9,6 +9,7 @@ def modalContent():
     st.markdown(modaltext)
 
 def formUI():
+    
     st.header("Select Fish:")
     st.markdown("---")
     # Initialize session state for tab count and inputs
@@ -107,6 +108,15 @@ def formUI():
                     if st.button("🗑️ Delete", key=f"delete_{tab}"):
                         delete_tab(tab)
         st.button('Submit', on_click=calc)
+        st.markdown("---")
+        if st.session_state.get("selected_biome"):
+            del st.session_state['selected_biome']
+        biome_options = ["Select a Biome"]+[' '.join(word.capitalize() for word in item.split("_")) for item in spawn_group_fish.keys()]
+        selected_biome = st.selectbox("View Fish found in Biome:", biome_options)
+        if selected_biome and selected_biome!="Select a Biome":
+            st.session_state.selected_biome = selected_biome
+            st.session_state.calc = False
+            st.rerun()
     else:
         st.warning("Please select at least one fish.")
         st.session_state.tab_count=0
@@ -122,7 +132,7 @@ def selectFishDetails(tab,i):
                 f"{size} ({sizeList[fishTypes[st.session_state.inputs[tab]['Fish']]['model']][size.lower()]} cm)"
                 for size in size_list if size not in selected_size_set
             ]
-            if current_size not in filtered_size_list:
+            if current_size not in filtered_size_list:  
                 current_size = filtered_size_list[0]
             selected_size = st.selectbox(
                 f"Size for {st.session_state.inputs[tab]['Fish']} {j + 1}:",

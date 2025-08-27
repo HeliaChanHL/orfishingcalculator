@@ -155,3 +155,53 @@ Fish: The type of fish you are targeting (e.g., Angelfish).
 Size: The size of the fish (e.g., Huge).
 Amount: How many of that fish you want to catch (e.g., 1).
 """
+
+spawn_group_fish = {
+    "lush": [
+        "cod", "bass", "salmon", "catfish", 
+        "bluegill", "yellow_perch", "goby", "gar"
+    ],
+    "boreal": [
+        "cod", "bass", "salmon", "rainbow_trout", 
+        "sturgeon", "golden_trout", "goby", "bitterling", "grayling"
+    ],
+    "arid": [
+        "cod", "bass", "gar", "arowana", 
+        "bonytail_chub", "loach", "banded_barb", "goldfish"
+    ],
+    "arctic": [
+        "cod", "bass", "salmon", "neon_tetra", 
+        "char", "bitterling", "pike", "betta", "grayling"
+    ],
+    "tropical": [
+        "cod", "bass", "goby", "gar", 
+        "loach", "goldfish", "damselfish", "angelfish", 
+        "piranha", "rainbowfish", "mahi_mahi", "clownfish"
+    ],
+    "shoreline": [
+        "damselfish", "seatrout", "anchovy", "coelacanth", 
+        "blue_marlin", "pufferfish", "tuna", "clownfish", 
+        "butterflyfish", "red_snapper"
+    ],
+    "ocean": [
+        "pufferfish", "tuna", "clownfish", "butterflyfish", 
+        "red_snapper", "turkeyfish", "surgeonfish", "oarfish", 
+        "napoleonfish", "ocean_sunfish", "anglerfish", "blobfish"
+    ],
+    "caves": [
+        "goby", "coelacanth", "anglerfish", "blobfish", 
+        "moss_feeder", "lanternfish", "barreleye", "blindcat"
+    ],
+    "ice_caves": [
+        "glintail"
+    ],
+    "dripstone_caves": [
+        "boneshark"
+    ],
+    "depths": [
+        "echoliath"
+    ],
+    "blighted_badlands": [
+        "besmirch"
+    ]
+}

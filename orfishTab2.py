@@ -23,83 +23,120 @@ def calcOdds(fish,j):
 		if fish["Fish"] in st.session_state.bestBiomeMapping[biome]:
 			fishbiome=biome
 			break
-	return (sizeOdds[fish["Size"][j].lower()] / 100) * rarityOdds[rarity] * (1 /biome_counts[fishbiome])
+	return (sizeOdds[fish["Size"][j].split(" ")[0].lower()] / 100) * rarityOdds[rarity] * (1 /biome_counts[fishbiome])
 
 def calcPrices(fish,j):
     model = fishTypes[fish["Fish"]]["model"]
-    size = sizeList[model][fish["Size"][j].lower()]
+    size = sizeList[model][fish["Size"][j].split(" ")[0].lower()]
     return priceList[size]+rarityList[fishTypes[fish["Fish"]]["rarity"]]
 
 def display():
-    st.header("Results:")
-    st.markdown("---")
-    st.subheader("Fishing Locations")
-    st.write(f"Best combination with {st.session_state.minBiomesFound} unique biomes:")
+    if 'selected_biome' not in st.session_state:
+        st.header("Results:")
+        st.markdown("---")
+        st.subheader("Fishing Locations")
+        st.write(f"Best combination with {st.session_state.minBiomesFound} unique biomes:")
 
-    df_biome_fish = pd.DataFrame(
-        st.session_state.bestBiomeMapping.items(),
-        columns=["Biome Category", "Fish"]
-    )
-    st.dataframe(df_biome_fish)
-    st.write(f"Specific Biomes in Biome categories:")
-    data = [
-        (
-           item,
-           [' '.join(word.capitalize() for word in j.split(":")[1].replace('_', ' ').split()) for j in fishingBiomes[item]]
+        df_biome_fish = pd.DataFrame(
+            st.session_state.bestBiomeMapping.items(),
+            columns=["Biome Category", "Fish"]
         )
-        for item in st.session_state.bestBiomeMapping.keys()
+        st.dataframe(df_biome_fish)
+        st.write(f"Specific Biomes in Biome categories:")
+        data = [
+            (
+            item,
+            [' '.join(word.capitalize() for word in j.split(":")[1].replace('_', ' ').split()) for j in fishingBiomes[item]]
+            )
+            for item in st.session_state.bestBiomeMapping.keys()
 
-    ]
+        ]
 
-    df_inputs = pd.DataFrame(data, columns=["Biome Category","Biomes"])
-    st.dataframe(df_inputs)
-    st.markdown("---")
-    st.subheader("Fish Income")
+        df_inputs = pd.DataFrame(data, columns=["Biome Category","Biomes"])
+        st.dataframe(df_inputs)
+        st.markdown("---")
+        st.subheader("Fish Income")
 
-    data = [
-        (
-            item["Fish"],
-            item["Size"][j],
-            item["Amount"][j],
-            calcPrices(item, j),
-            item["Amount"][j] * calcPrices(item, j)
+        data = [
+            (
+                item["Fish"],
+                item["Size"][j],
+                item["Amount"][j],
+                calcPrices(item, j),
+                item["Amount"][j] * calcPrices(item, j)
+            )
+            for item in st.session_state.inputs.values()
+            for j in range(len(item["Size"]))
+        ]
+        df_inputs = pd.DataFrame(data, columns=["Fish", "Size", "Amount", "Price", "Total Price"])
+        total_income = df_inputs["Total Price"].sum()
+        st.success(f"Total Income from Selling Fish: {total_income} rubies")
+        st.dataframe(df_inputs)
+
+        st.write("Total Income per Fish Type")
+        tab1, tab2, tab3 = st.tabs(["Unsorted", "By Type", "By Value"])
+        with tab1:
+            fishChart(df_inputs)
+        with tab2:
+            fishChart2(df_inputs)
+        with tab3:
+            fishChart3(df_inputs)
+        
+        st.markdown("---")
+        st.subheader("Fish Odds:")
+
+        data = [
+            (
+                item["Fish"],
+                fishTypes[item["Fish"]]["biomes"],
+                item["Size"][j],
+                calcOdds(item,j),
+            )
+            for item in st.session_state.inputs.values()
+            for j in range(len(item["Size"]))
+        ]
+
+        df_inputs = pd.DataFrame(data, columns=["Fish", "Biomes", "Size", "Catch Odds % per Fish"])
+        st.dataframe(df_inputs)
+
+        with st.expander("Raw Inputs:", expanded=False):
+            st.write(st.session_state.inputs)
+    else:
+        selected_biome = st.session_state.selected_biome.lower().replace(' ',"_")
+        st.write(f"Here are the fish available in {selected_biome.capitalize()} biomes:")
+        
+        selected_fish = spawn_group_fish[selected_biome]
+
+        # Capitalize fish names
+        capitalized_fish = [' '.join(word.capitalize() for word in item.split("_")) for item in selected_fish]
+
+        # Retrieve biome categories
+        biome_categories = []
+        for item in capitalized_fish:
+            biome_categories.append([biome for biome in fishTypes[item]["biomes"] if biome != selected_biome])
+
+        # Create the DataFrame using zip
+        fish_df = pd.DataFrame(
+            list(zip(capitalized_fish, biome_categories)), 
+            columns=["Fish", "Other Biome Categories"]
         )
-        for item in st.session_state.inputs.values()
-        for j in range(len(item["Size"]))
-    ]
-    df_inputs = pd.DataFrame(data, columns=["Fish", "Size", "Amount", "Price", "Total Price"])
-    total_income = df_inputs["Total Price"].sum()
-    st.success(f"Total Income from Selling Fish: {total_income} rubies")
-    st.dataframe(df_inputs)
 
-    st.write("Total Income per Fish Type")
-    tab1, tab2, tab3 = st.tabs(["Unsorted", "By Type", "By Value"])
-    with tab1:
-        fishChart(df_inputs)
-    with tab2:
-        fishChart2(df_inputs)
-    with tab3:
-        fishChart3(df_inputs)
-    
-    st.markdown("---")
-    st.subheader("Fish Odds:")
+        # Display the DataFrame
+        if not fish_df.empty:
+            st.dataframe(fish_df)
+        else:
+            st.write("No fish data available.")
 
-    data = [
-        (
-            item["Fish"],
-            fishTypes[item["Fish"]]["biomes"],
-            item["Size"][j],
-            calcOdds(item,j),
-        )
-        for item in st.session_state.inputs.values()
-        for j in range(len(item["Size"]))
-    ]
+        st.write(f"Specific Biomes in Selected Biome Category:")
+        data = [
+            (
+            st.session_state.selected_biome,
+            [' '.join(word.capitalize() for word in j.split(":")[1].replace('_', ' ').split()) for j in fishingBiomes[selected_biome]]
+            )
 
-    df_inputs = pd.DataFrame(data, columns=["Fish", "Biomes", "Size", "Catch Odds % per Fish"])
-    st.dataframe(df_inputs)
-
-    with st.expander("Raw Inputs:", expanded=False):
-        st.write(st.session_state.inputs)
+        ]
+        df_inputs = pd.DataFrame(data, columns=["Biome Category","Biomes"])
+        st.dataframe(df_inputs)
 
 def fishChart(df_inputs):
     fig = go.Figure()

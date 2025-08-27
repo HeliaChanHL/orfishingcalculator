@@ -48,13 +48,19 @@ with col2:
 if st.session_state.calc:
     orfishTab1.formUI()
 else:
-    if 'minBiomesFound' not in st.session_state:
-        st.session_state.buttonDis=True
-    elif "inputs" not in st.session_state:
-        st.session_state.buttonDis=True
-    elif "bestBiomeMapping" not in st.session_state:
-        st.warning("No valid combination found.")
-        st.session_state.buttonDis=True
+    if 'selected_biome' not in st.session_state:
+        if 'minBiomesFound' not in st.session_state:
+            st.session_state.buttonDis=True
+        elif "inputs" not in st.session_state:
+            st.session_state.buttonDis=True
+        elif "bestBiomeMapping" not in st.session_state:
+            st.warning("No valid combination found.")
+            st.session_state.buttonDis=True
+        else:
+            if st.session_state.buttonDis:
+                st.session_state.buttonDis=False
+                st.rerun()
+            orfishTab2.display()
     else:
         if st.session_state.buttonDis:
             st.session_state.buttonDis=False
