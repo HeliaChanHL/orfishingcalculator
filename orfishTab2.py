@@ -249,21 +249,27 @@ def fishChart3(df_inputs):
 
     # Sort by total price
     fish_df = fish_df.sort_values(by='Total Price', ascending=True)
+
     # Initialize figure
     fig = go.Figure()
     default_colors = colors.DEFAULT_PLOTLY_COLORS
     added_fish_names = set()
 
-    for fish in fish_df.iterrows():
-        show_legend = fish[1]['Fish'] not in added_fish_names
+    for _, fish in fish_df.iterrows():
+        fish_name = fish['Fish']
+        show_legend = fish_name not in added_fish_names
+        
         if show_legend:
-            added_fish_names.add(fish[1]['Fish'])
-        added_fish_list = list(added_fish_names)
+            added_fish_names.add(fish_name)
+
+        # Determine the color for the current fish
+        color_index = list(added_fish_names).index(fish_name) % len(default_colors)
+
         fig.add_trace(go.Bar(
-            x=[f"{fish[1]['Fish']} - {fish[1]['Size']}"], 
-            y=[fish[1]['Total Price']], 
-            name=fish[1]['Fish'],
-            marker_color=default_colors[added_fish_list.index(fish[1]['Fish']) % len(default_colors)],
+            x=[f"{fish_name} - {fish['Size']}"], 
+            y=[fish['Total Price']], 
+            name=fish_name,
+            marker_color=default_colors[color_index],
             showlegend=show_legend
         ))
 
