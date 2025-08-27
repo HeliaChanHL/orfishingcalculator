@@ -32,8 +32,6 @@ def calcPrices(fish,j):
     return priceList[size]+rarityList[fishTypes[fish["Fish"]]["rarity"]]
 
 def display():
-    if "fishIndex" not in st.session_state:
-            st.session_state.fishIndex=0
     if 'selected_biome' not in st.session_state:
         st.header("Results:")
         st.markdown("---")
@@ -105,7 +103,8 @@ def display():
         with st.expander("Raw Inputs:", expanded=False):
             st.write(st.session_state.inputs)
     else:
-		st.session_state.fishIndex=0
+		if "fishIndex" not in st.session_state:
+            st.session_state.fishIndex=0
         selected_biome = st.session_state.selected_biome.lower().replace(' ',"_")
         selected_fish = spawn_group_fish[selected_biome]
         
@@ -280,4 +279,5 @@ def fishChart3(df_inputs):
     # Display the chart
 
     st.plotly_chart(fig, use_container_width=True)
+
 
