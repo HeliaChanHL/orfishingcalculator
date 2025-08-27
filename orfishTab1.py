@@ -10,117 +10,119 @@ def modalContent():
 
 def formUI():
     
-    st.header("Select Fish:")
     st.markdown("---")
-    # Initialize session state for tab count and inputs
-    if 'tab_count' not in st.session_state:
-        st.session_state.tab_count = 1
-        st.session_state.inputs = {
-            f'Fish {i + 1}': {
-                'Fish': "Select a Fish",  # Default to "Select a Fish"
+    tab1, tab2 = st.tabs(["Search Fish","Search Biomes"])
+    with tab1:
+        # Initialize session state for tab count and inputs
+        if 'tab_count' not in st.session_state:
+            st.session_state.tab_count = 1
+            st.session_state.inputs = {
+                f'Fish {i + 1}': {
+                    'Fish': "Select a Fish",  # Default to "Select a Fish"
+                    'Size': ["Select a Size"],
+                    'Amount': [1],
+                    'InputGroup': 1 
+                } for i in range(st.session_state.tab_count)
+            }
+
+        def add_tab():
+            new_tab_name = f'Fish {st.session_state.tab_count + 1}'
+            st.session_state.tab_count += 1
+            st.session_state.inputs[new_tab_name] = {
+                'Fish': "Select a Fish",
                 'Size': ["Select a Size"],
                 'Amount': [1],
                 'InputGroup': 1 
-            } for i in range(st.session_state.tab_count)
-        }
-
-    def add_tab():
-        new_tab_name = f'Fish {st.session_state.tab_count + 1}'
-        st.session_state.tab_count += 1
-        st.session_state.inputs[new_tab_name] = {
-            'Fish': "Select a Fish",
-            'Size': ["Select a Size"],
-            'Amount': [1],
-            'InputGroup': 1 
-        }
-    def delete_tab(tab):
-        del st.session_state.inputs[tab]
-        st.rerun()
-    def add_All():
-        st.session_state.inputs={}
-        st.session_state.tab_count=0
-        for i in list(fishTypes.keys()):
-            st.session_state.tab_count += 1
-            new_tab_name = f'Fish {st.session_state.tab_count }'
-            st.session_state.inputs[new_tab_name] = {
-                'Fish': i,
-                'Size': ["Giant"],
-                'Amount': [1],
-                'InputGroup': 1 
-        }
-    def fishPNG(selected_fish):
-        if selected_fish == "Select a Fish":
-            return
-        image_path = f"fish_renders/{selected_fish.replace(' ', '_').lower()}.png"
-        if path.isfile(image_path):
-            st.image(image_path, caption=selected_fish, width=200)
-            if current_fish != selected_fish:
-                st.rerun()
-        else:
-            st.error(f"Image for {selected_fish} not found.")
-    col1,col2=st.columns([3,1])
-    with col1:
-        if st.button("Add a Fish"):
-            add_tab()
-    with col2:
-        if st.button("Add all Giant Fish Types"):
-            add_All()
-    if st.session_state.inputs!={}:
-        fishTabs = [f"{key}: {value['Fish']}" if value["Fish"] != "Select a Fish" else key for key, value in st.session_state.inputs.items()]
-        selected_tab = st.tabs(fishTabs)
-        for i, tab in enumerate(fishTabs):
-            with selected_tab[i]:
-                tab=tab.split(":")[0]
-                current_fish = st.session_state.inputs[tab]['Fish']
-                
-                # Gather all selected fish from previous tabs
-                selected_fish_set = {st.session_state.inputs[t.split(":")[0]]['Fish'] for t in fishTabs if t.split(":")[0] != tab}
-                fish_list = [' '.join(word.capitalize() for word in fish.replace('_', ' ').split()) for fish in fishTypes.keys()]
-                filtered_fish_list = ["Select a Fish"] + sorted([fish for fish in fish_list if fish not in selected_fish_set])
-
-                col1, col2 = st.columns([2, 1])
-
-                with col1:
-                    # Ensure the current fish is valid
-                    if current_fish not in filtered_fish_list:
-                        current_fish = filtered_fish_list[0]
-
-                    # Select box for choosing fish type
-                    selected_fish = st.selectbox(
-                        f'Fish Type for Fish {i + 1}',
-                        filtered_fish_list,
-                        index=filtered_fish_list.index(current_fish),
-                        key=f'fish_{tab}_{i}'
-                    )
-
-                    # Update session state with selected fish
-                    if selected_fish != "Select a Fish":
-                        st.session_state.inputs[tab]['Fish'] = selected_fish
-                        if st.button("Add New Size", key=f'add_size_{tab}_{i}'):
-                            st.session_state.inputs[tab]['InputGroup'] += 1
-                            st.session_state.inputs[tab]['Size'].append("Select a Size")
-                            st.session_state.inputs[tab]['Amount'].append(1)
-                            st.rerun()
-
-                        selectFishDetails(tab,i)
-                with col2:
-                    fishPNG(selected_fish)
-                    if st.button("🗑️ Delete", key=f"delete_{tab}"):
-                        delete_tab(tab)
-        st.button('Submit', on_click=calc)
-        st.markdown("---")
-        if st.session_state.get("selected_biome"):
-            del st.session_state['selected_biome']
-        biome_options = ["Select a Biome"]+[' '.join(word.capitalize() for word in item.split("_")) for item in spawn_group_fish.keys()]
-        selected_biome = st.selectbox("View Fish found in Biome:", biome_options)
-        if selected_biome and selected_biome!="Select a Biome":
-            st.session_state.selected_biome = selected_biome
-            st.session_state.calc = False
+            }
+        def delete_tab(tab):
+            del st.session_state.inputs[tab]
             st.rerun()
-    else:
-        st.warning("Please select at least one fish.")
-        st.session_state.tab_count=0
-        st.session_state.inputs={}
+        def add_All():
+            st.session_state.inputs={}
+            st.session_state.tab_count=0
+            for i in list(fishTypes.keys()):
+                st.session_state.tab_count += 1
+                new_tab_name = f'Fish {st.session_state.tab_count }'
+                st.session_state.inputs[new_tab_name] = {
+                    'Fish': i,
+                    'Size': ["Giant"],
+                    'Amount': [1],
+                    'InputGroup': 1 
+            }
+        def fishPNG(selected_fish):
+            if selected_fish == "Select a Fish":
+                return
+            image_path = f"fish_renders/{selected_fish.replace(' ', '_').lower()}.png"
+            if path.isfile(image_path):
+                st.image(image_path, caption=selected_fish, width=200)
+                if current_fish != selected_fish:
+                    st.rerun()
+            else:
+                st.error(f"Image for {selected_fish} not found.")
+        col1,col2=st.columns([3,1])
+        with col1:
+            if st.button("Add a Fish"):
+                add_tab()
+        with col2:
+            if st.button("Add all Giant Fish Types"):
+                add_All()
+        if st.session_state.inputs!={}:
+            fishTabs = [f"{key}: {value['Fish']}" if value["Fish"] != "Select a Fish" else key for key, value in st.session_state.inputs.items()]
+            selected_tab = st.tabs(fishTabs)
+            for i, tab in enumerate(fishTabs):
+                with selected_tab[i]:
+                    tab=tab.split(":")[0]
+                    current_fish = st.session_state.inputs[tab]['Fish']
+                    
+                    # Gather all selected fish from previous tabs
+                    selected_fish_set = {st.session_state.inputs[t.split(":")[0]]['Fish'] for t in fishTabs if t.split(":")[0] != tab}
+                    fish_list = [' '.join(word.capitalize() for word in fish.replace('_', ' ').split()) for fish in fishTypes.keys()]
+                    filtered_fish_list = ["Select a Fish"] + sorted([fish for fish in fish_list if fish not in selected_fish_set])
+
+                    col1, col2 = st.columns([2, 1])
+
+                    with col1:
+                        # Ensure the current fish is valid
+                        if current_fish not in filtered_fish_list:
+                            current_fish = filtered_fish_list[0]
+
+                        # Select box for choosing fish type
+                        selected_fish = st.selectbox(
+                            f'Fish Type for Fish {i + 1}',
+                            filtered_fish_list,
+                            index=filtered_fish_list.index(current_fish),
+                            key=f'fish_{tab}_{i}'
+                        )
+
+                        # Update session state with selected fish
+                        if selected_fish != "Select a Fish":
+                            st.session_state.inputs[tab]['Fish'] = selected_fish
+                            if st.button("Add New Size", key=f'add_size_{tab}_{i}'):
+                                st.session_state.inputs[tab]['InputGroup'] += 1
+                                st.session_state.inputs[tab]['Size'].append("Select a Size")
+                                st.session_state.inputs[tab]['Amount'].append(1)
+                                st.rerun()
+
+                            selectFishDetails(tab,i)
+                    with col2:
+                        fishPNG(selected_fish)
+                        if st.button("🗑️ Delete", key=f"delete_{tab}"):
+                            delete_tab(tab)
+            st.button('Submit', on_click=calc)
+        else:
+            st.warning("Please select at least one fish.")
+            st.session_state.tab_count=0
+            st.session_state.inputs={}
+        with tab2:
+            if st.session_state.get("selected_biome"):
+                del st.session_state['selected_biome']
+            biome_options = ["Select a Biome"]+[' '.join(word.capitalize() for word in item.split("_")) for item in spawn_group_fish.keys()]
+            selected_biome = st.selectbox("View Fish found in Biome:", biome_options)
+            if selected_biome and selected_biome!="Select a Biome":
+                st.session_state.selected_biome = selected_biome
+                st.session_state.calc = False
+                st.rerun()
+    
 
 def selectFishDetails(tab,i):
     for j in range(st.session_state.inputs[tab]['InputGroup']):
