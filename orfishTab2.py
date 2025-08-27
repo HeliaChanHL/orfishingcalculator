@@ -3,6 +3,7 @@ import pandas as pd
 from fishingData import *
 import plotly.graph_objects as go
 from plotly import colors
+from os import path
 def fishperBiome(fishTypes):
     biome_counts = {}
     for attr in fishTypes.values():
@@ -31,6 +32,7 @@ def calcPrices(fish,j):
     return priceList[size]+rarityList[fishTypes[fish["Fish"]]["rarity"]]
 
 def display():
+    
     if 'selected_biome' not in st.session_state:
         st.header("Results:")
         st.markdown("---")
@@ -102,14 +104,17 @@ def display():
         with st.expander("Raw Inputs:", expanded=False):
             st.write(st.session_state.inputs)
     else:
+        if "fishIndex" not in st.session_state:
+            st.session_state.fishIndex=0
         selected_biome = st.session_state.selected_biome.lower().replace(' ',"_")
-        st.write(f"Here are the fish available in {selected_biome.capitalize()} biomes:")
-        
         selected_fish = spawn_group_fish[selected_biome]
+        
+        
+        st.write(f"Here are the fish available in {selected_biome.capitalize()} biomes:")
 
         # Capitalize fish names
         capitalized_fish = [' '.join(word.capitalize() for word in item.split("_")) for item in selected_fish]
-
+        current_fish=capitalized_fish[st.session_state.fishIndex]
         # Retrieve biome categories
         biome_categories = []
         for item in capitalized_fish:
@@ -120,7 +125,32 @@ def display():
             list(zip(capitalized_fish, biome_categories)), 
             columns=["Fish", "Other Biome Categories"]
         )
-
+        def fishPNG(newFish):
+            nonlocal current_fish
+            image_path = f"fish_renders/{newFish.replace(' ', '_').lower()}.png"
+            if path.isfile(image_path):
+                st.image(image_path, caption=newFish, width=200)
+                if current_fish != newFish:
+                    current_fish=newFish
+                    st.rerun()
+            else:
+                st.error(f"Image for {newFish} not found.")
+        def previmg():
+            if st.session_state.fishIndex>0:
+                st.session_state.fishIndex-=1
+        def nextimg():
+            if st.session_state.fishIndex<len(selected_fish)-1:
+                st.session_state.fishIndex+=1
+        with st.container(border=True):
+            col1,col2,col3=st.columns(3)
+            col4,col5=st.columns(2)
+            with col2:
+                fishPNG(capitalized_fish[st.session_state.fishIndex])
+            with col4:
+                st.button("Previous",on_click=previmg)
+            with col5:
+                st.button("Next",on_click=nextimg)
+       
         # Display the DataFrame
         if not fish_df.empty:
             st.dataframe(fish_df)
