@@ -38,17 +38,25 @@ def formUI():
             del st.session_state.inputs[tab]
             st.rerun()
         def add_All():
-            st.session_state.inputs={}
-            st.session_state.tab_count=0
+            st.session_state.inputs = {}
+            st.session_state.tab_count = 0
+
             for i in list(fishTypes.keys()):
                 st.session_state.tab_count += 1
-                new_tab_name = f'Fish {st.session_state.tab_count }'
+                new_tab_name = f'Fish {st.session_state.tab_count}'
+                
+                # Safely access the size
+                model = fishTypes[i]['model']
+                size_value = sizeList[model]["giant"]  # Access the giant size
+                size_string = f"Giant ({size_value} cm)"
+
+                # Initialize the inputs for the new tab
                 st.session_state.inputs[new_tab_name] = {
                     'Fish': i,
-                    'Size': ["Giant"],
+                    'Size': [size_string],
                     'Amount': [1],
                     'InputGroup': 1 
-            }
+                }
         def fishPNG(selected_fish):
             if selected_fish == "Select a Fish":
                 return
