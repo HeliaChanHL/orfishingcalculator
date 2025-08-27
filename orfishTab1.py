@@ -120,6 +120,7 @@ def formUI():
             selected_biome = st.selectbox("View Fish found in Biome:", biome_options)
             if selected_biome and selected_biome!="Select a Biome":
                 st.session_state.selected_biome = selected_biome
+                st.session_state.fishIndex=0
                 st.session_state.calc = False
                 st.rerun()
     
@@ -232,5 +233,4 @@ def updateBiomeMap(biome, biomeMap):
         tempBiomeMap[biome] = biomeMap["arid"]
         del tempBiomeMap["arid"]
     
-
     return tempBiomeMap

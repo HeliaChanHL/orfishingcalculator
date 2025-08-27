@@ -103,14 +103,11 @@ def display():
         with st.expander("Raw Inputs:", expanded=False):
             st.write(st.session_state.inputs)
     else:
-		if "fishIndex" not in st.session_state:
-            st.session_state.fishIndex=0
         selected_biome = st.session_state.selected_biome.lower().replace(' ',"_")
         selected_fish = spawn_group_fish[selected_biome]
-        
-        
-        st.write(f"Here are the fish available in {selected_biome.capitalize()} biomes:")
 
+        st.write(f"Here are the fish available in {selected_biome.capitalize()} biomes:")
+        
         # Capitalize fish names
         capitalized_fish = [' '.join(word.capitalize() for word in item.split("_")) for item in selected_fish]
         current_fish=capitalized_fish[st.session_state.fishIndex]
@@ -277,7 +274,4 @@ def fishChart3(df_inputs):
     )
 
     # Display the chart
-
     st.plotly_chart(fig, use_container_width=True)
-
-
