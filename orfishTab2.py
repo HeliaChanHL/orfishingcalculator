@@ -32,7 +32,8 @@ def calcPrices(fish,j):
     return priceList[size]+rarityList[fishTypes[fish["Fish"]]["rarity"]]
 
 def display():
-    
+    if "fishIndex" not in st.session_state:
+            st.session_state.fishIndex=0
     if 'selected_biome' not in st.session_state:
         st.header("Results:")
         st.markdown("---")
@@ -279,3 +280,4 @@ def fishChart3(df_inputs):
     # Display the chart
 
     st.plotly_chart(fig, use_container_width=True)
+
