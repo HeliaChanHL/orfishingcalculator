@@ -75,7 +75,7 @@ st.markdown("""
 """)
 footer_container = st.container()
 with footer_container:
-    col1, col2, col3 = st.columns((3, 1, 2))
+    col1, col2, col3 = st.columns((3, 2, 1))
     
     with col1:
         with col1:
@@ -111,6 +111,7 @@ with footer_container:
         """, unsafe_allow_html=True)
     
         st.write("Fish Assets by itsMarkiS")
+        st.write("Copyright © Amelia Freeman")
     
     
     with col3:
@@ -141,7 +142,8 @@ with footer_container:
                     
 
         """, unsafe_allow_html=True)
-        st.write("Copyright © Amelia Freeman")
+        
+
 
 
 
