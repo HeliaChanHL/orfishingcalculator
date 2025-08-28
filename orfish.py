@@ -141,6 +141,7 @@ with footer_container:
                     
 
         """, unsafe_allow_html=True)
-      st.write("Copyright © Amelia Freeman")
+        st.write("Copyright © Amelia Freeman")
+
 
 
